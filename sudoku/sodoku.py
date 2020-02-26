@@ -29,119 +29,168 @@ def find_coord(i, j):
             y = 6                 
     return x, y
 
-def check_cells(board, i, j):
-    options = []
-    number = 1
+def find_missing_numbers_row(board, row, n, skip):
     
-    while(j < 9):
-        skip = False
-        if number not in board[i] and number not in board[:,j]:
-            x, y = find_coord(i,j)
-            for k in range(3):
-                for l in range(3):
-                    if board[x+k][y+l] == number:
-                        skip = True
-                        break
-            
-            if skip == False:
-                options.append(number)
-                print("apend", number)
-        
-        number += 1
-        j += 1
+    numbers = [1,2,3,4,5,6,7,8,9]
 
-    return options
+    if skip != -1:
+        numbers.pop(skip - 1)
+
+    for i in range(n-1):
+        if board[row][i] != 0:
+            numbers = find_and_pop(numbers, board[row][i])
+
+    return numbers
+
+def find_and_pop(number_list, number):
+    for i in range(len(number_list)):
+        if number_list[i] == number:
+            number_list.pop(i)
+            return number_list
 
 def eval_n(board, number, i, j):
-    if board[i][j] != 0:
-        return -1
+    element = 0
+    
+    while(element < len(number)):
+        if board[i][j] != 0:
+            return -1
 
-    if number in board[i,:] or number in board[:,j]:
+        if number[element] in board[i,:] or number[element] in board[:,j]:
+            print("popped an element, before pop", element, len(number))
+            number.pop(element)
+            print("popped an element, before pop, after pop", element, len(number))
+        
+        if element >= len(number):
+            print("element > len")
+            if len(number) > 0:
+                return 1
+            else:
+                return 0
+        
+
+        if number[element] not in board[i,:] and number[element] not in board[:,j]:
+                x, y = find_coord(i,j)
+                for k in range(3):
+                    for l in range(3):
+                        try:
+                            if board[x+k][y+l] == number[element]:
+                                number.pop(element)
+                        except:
+                            print(x+k, y+l, element, len(number))
+        
+        element += 1
+    
+    if len(number) == 0:
         return 0
-
-    if number not in board[i,:] and number not in board[:,j]:
-            x, y = find_coord(i,j)
-            for k in range(3):
-                for l in range(3):
-                    if board[x+k][y+l] == number:
-                        return 0
     
     return 1
 
 def fill_cell(board, i, j, options):
     if len(options) == 0:
         print("hoihojfowjef")
-        return -1
+        return
     
-    index = randint(0, len(options)-1)
-    number = options[index]
+    status = eval_n(board, options, i, j)
     
-    if(eval_n(board, number, i, j) == 0):
-        print("not ok, recursion", number)
-        options.pop(index) 
-        fill_cell(board, i, j, options)
-        return 0
+    if status == 0:
+        print("no numbers left in options")
+        return status
 
-    if(eval_n(board, number, i, j) == -1):
-        return 1
+    if status == -1:
+        print("number wasnt 0")
+        return status
 
-    else:
-        print("all is well, added", number)  
-        board[i][j] = number
+    if status == 1:
+        print("all is well, added")  
+        index = randint(0, len(options)-1)
+        board[i][j] = options[index]
         options.pop(index)
-        return 1
+        return status
     
     
 
 
-def create_board(options, n):
-    #1,1    1,3     1,6
-    #3,1    3,3     3,6
-    #6,1    6,3     6,6 
-
+def create_board(n):
+    board = np.zeros((n,n), dtype=int)
+    # board = np.array([
+    #     [0,0,3,0,2,0,6,0,0],
+    #     [9,0,0,3,0,5,0,0,1],
+    #     [0,0,1,8,0,6,4,0,0],
+    #     [0,0,8,1,0,2,9,0,0],
+    #     [7,0,0,0,0,0,0,0,8],
+    #     [0,0,6,7,0,8,2,0,0],
+    #     [0,0,2,6,0,9,5,0,0],
+    #     [8,0,0,2,0,3,0,0,9],
+    #     [0,0,5,0,1,0,3,0,0]
+    # ])
+    number_to_skip = -1
+    
     i = 0
     j = 0
-    
-    board = np.zeros((n,n), dtype=int)
-    
     while(i < n):
         while(j < n):
-            status = fill_cell(board, (i%n), (j%n), options)
+            options = find_missing_numbers_row(board, i, n, number_to_skip)
+            number_to_skip = -1
+            status = fill_cell(board, (i), (j), options)
+            
             print(board)
             time.sleep(1)
-            print(status)
-            if len(options) == 0 and status != -1:
-                if j == (n-1):
-                    j = 0
-                    i = i+1
-                    options = [1,2,3,4,5,6,7,8,9]
-                    break
-
-                elif status == 0 or status == -1:
-                    j = j-1
-                    board[i][j] = 0
-                    options = check_cells(board, i, j)
-                
-                else:
-                    print("j", j)
-                    options = check_cells(board, i, j)
-        
-           
-            #gå videre
+            
             if status == 1:
                 j += 1
+                if j > (n-1):
+                    j = 0
+                    i = i+1
+                
+                    options = [1,2,3,4,5,6,7,8,9]
+                
+                continue
+            
+            if status == -1:
+                if len(options) > 0:
+                    j += 1
+                    break
+                if j > (n-1):
+                    j = 0
+                    i += 1
+                    break
+                else:
+                    board[i][j] = 0
+                    j = j-1
+                    number_to_skip = board[i][j]
+                    board[i][j] = 0
+                
+                    break
+                print("gikk gjennom alle tester uten å gjøre noe, status -1")
+            
+            if len(options) == 0:
+                if status == 1:
+                    if j == (n-1):
+                        j = 0
+                        i = i+1
+                    
+                        options = [1,2,3,4,5,6,7,8,9]
+                    
+                    break
+                
+                if status == 0:
+                    #ensure current j is 0 go back one and reset that to zero
+                    board[i][j] = 0
+                    j = j-1
+                    number_to_skip = board[i][j]
+                    board[i][j] = 0
+                    break
 
-        #ikke inkrementer om flagget er false
-        
-        #gå videre
-        #i += 1
+                print("gikk gjennom alle tester uten å gjøre noe, len 0")
+                
+            
+
+
         
     
     return board
 
                     
-
-options = [1,2,3,4,5,6,7,8,9]
-s = create_board(options, 9)
+s = create_board(9)
 print(s)
 
