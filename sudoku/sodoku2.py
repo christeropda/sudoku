@@ -12,7 +12,14 @@ import sys
 #6,0    6,3     6,6
 #7,0
 #8,0
-#9,0       
+#9,0     
+
+
+def check_board(board):
+  for row in range(0,9):
+      for col in range(0,9):
+        if board[row][col] == 0:
+          return False
 
 def solve_board(board):  
     for x in range(9):
@@ -21,16 +28,19 @@ def solve_board(board):
                 for n in range(1,10):
                     if(test_fit(x, y, n)):
                         board[x][y] = n
-                        board = solve_board(board)
-                        board[x][y] = 0
-
-                return board
-
-
-    if(test_board(board)):
+                        print(board)
+                        time.sleep(0.5)
+                        if(check_board(board) == True):
+                            break
+                        else:
+                            if(solve_board(board) == True):
+                                return True
+                break
+    if check_board(board) == False:
+        board[x][y] = 0
         print(board)
-        quit()
-    return board
+        time.sleep(0.5)
+    #return board
         
 def test_fit(x, y, number):
     for i in range(9):
@@ -98,11 +108,12 @@ board[0] = [6, 4, 9, 2, 5, 7, 1, 8, 3]
 #     [0, 0, 0, 0, 0, 0, 0, 0, 0]
 #     ])
 
-ee = solve_board(board)
+solve_board(board)
+solve_board(board)
 print("-----------------------------")
 print(board)
 print("-----------------------------")
-print(final)
+
 
 
 
