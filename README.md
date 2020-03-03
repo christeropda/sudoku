@@ -1,6 +1,7 @@
 # Sudoku solver, utilizing backtracking by recursion
 
 pip3 install numpy
+
 cd into sudoku folder
 
 python3 sudoku.py

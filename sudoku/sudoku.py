@@ -1,9 +1,11 @@
 import numpy as np
 import time
 from random import randint
-import sys
+
 
 def solve(board):
+    # time.sleep(1)
+    # print(board)
     for x in range(9):
         for y in range(9):
             if board[x][y] == 0:
@@ -25,9 +27,7 @@ def check_board(board):
         for y in range(9):
             if board[x][y] == 0:
                 return False
-
     return True
-
 
 def test_fit(x, y, number, board):
     for i in range(9):
@@ -48,7 +48,6 @@ def test_fit(x, y, number, board):
 
     return True
 
-#grid = np.zeros((9,9), dtype=int)
 grid = np.array([
     [8, 6, 5, 3, 0, 0, 0, 0, 0],
     [0, 0, 0, 0, 0, 5, 0, 2, 1],
