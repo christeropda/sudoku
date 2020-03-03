@@ -2,7 +2,6 @@ import numpy as np
 import time
 from random import randint
 
-
 def solve(board):
     # time.sleep(1)
     # print(board)
